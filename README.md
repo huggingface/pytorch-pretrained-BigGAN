@@ -48,7 +48,7 @@ See the [doc section](#doc) below for details on these classes and methods.
 
 ```python
 import torch
-from pytorch_pretrained_biggan import (BigGAN, one_hot_from_name, truncated_noise_sample,
+from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample,
                                        save_as_images, display_in_terminal)
 
 # OPTIONAL: if you want to have more information on what's happening, activate the logger as follows
@@ -58,25 +58,29 @@ logging.basicConfig(level=logging.INFO)
 # Load pre-trained model tokenizer (vocabulary)
 model = BigGAN.from_pretrained('biggan-deep-256')
 
-# Prepare a dogball input
+# Prepare a input
 truncation = 0.4
-class_vector = (one_hot_from_name('tennis ball') + one_hot_from_name('chihuahua')) / 2
-noise_vector = truncated_noise_sample(truncation=truncation)
+class_vector = one_hot_from_names(['soap bubble', 'coffee', 'mushroom'], batch_size=3)
+noise_vector = truncated_noise_sample(truncation=truncation, batch_size=3)
 
 # All in tensors
 noise_vector = torch.from_numpy(noise_vector)
 class_vector = torch.from_numpy(class_vector)
 
-# Generate a dog ball
-dogball = model(noise_vector, class_vector, truncation)
-
-# Save results as png images
-save_as_images(dogball)
+# Generate an image
+output = model(noise_vector, class_vector, truncation)
 
 # If you have a sixtel compatible terminal you can display the images in the terminal
 # (see https://github.com/saitoha/libsixel for details)
-display_in_terminal(dogball)
+display_in_terminal(output)
+
+# Save results as png images
+save_as_images(output)
 ```
+
+![output_0](assets/output_0.png)
+![output_1](assets/output_1.png)
+![output_2](assets/output_2.png)
 
 ## Doc
 
@@ -190,7 +194,7 @@ Here are some details on these methods:
     - Output:
         - array of shape (batch_size, 1000)
 
-- `one_hot_from_name(class_name, batch_size=1)`:
+- `one_hot_from_names(class_name, batch_size=1)`:
 
     Create a one-hot vector from the name of an imagenet class ('tennis ball', 'daisy', ...). We use NLTK's wordnet search to try to find the relevant synset of ImageNet and take the first one. If we can't find it direcly, we look at the hyponyms and hypernyms of the class name.
     - Params:

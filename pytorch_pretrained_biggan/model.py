@@ -298,9 +298,8 @@ class BigGAN(nn.Module):
 
 if __name__ == "__main__":
     import PIL
-    from .utils import truncated_noise_sample, save_as_images
+    from .utils import truncated_noise_sample, save_as_images, one_hot_from_names
     from .convert_tf_to_pytorch import load_tf_weights_in_biggan
-    from .imagenet import one_hot_from_name
 
     load_cache = False
     cache_path = './saved_model.pt'
@@ -316,7 +315,7 @@ if __name__ == "__main__":
 
     truncation = 0.4
     noise = truncated_noise_sample(batch_size=2, truncation=truncation)
-    label = one_hot_from_name('diver', batch_size=2)
+    label = one_hot_from_names('diver', batch_size=2)
 
     # Tests
     # noise = np.zeros((1, 128))
