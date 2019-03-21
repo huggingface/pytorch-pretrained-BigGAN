@@ -1,0 +1,4 @@
+tensorflow
+tensorflow-hub
+Pillow
+NLTK
