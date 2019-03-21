@@ -32,22 +32,24 @@ pip install -r full_requirements.txt
 This repository provide direct and simple access to the pretrained "deep" versions of BigGAN for 128, 256 and 512 pixels resolutions as described in the [associated publication](https://openreview.net/forum?id=B1xsqj09Fm).
 Here are some details on the models:
 
-- `BigGAN-deep-128` is a 50.4M parameters model generating 128x128 pixels images, the model dump weights 201 MB,
-- `BigGAN-deep-256` is a 55.9M parameters model generating 256x256 pixels images, the model dump weights 224 MB,
-- `BigGAN-deep-512` is a 56.2M parameters model generating 512x512 pixels images, the model dump weights 225 MB.
+- `BigGAN-deep-128`: a 50.4M parameters model generating 128x128 pixels images, the model dump weights 201 MB,
+- `BigGAN-deep-256`: a 55.9M parameters model generating 256x256 pixels images, the model dump weights 224 MB,
+- `BigGAN-deep-512`: a 56.2M parameters model generating 512x512 pixels images, the model dump weights 225 MB.
 
-Please refere to Appendix B of the paper for details on the architectures.
+Please refer to Appendix B of the paper for details on the architectures.
 
 All models comprise pre-computed batch norm statistics for 51 truncation values between 0 and 1 (see Appendix C.1 in the paper for details).
 
 ## Usage
 
 Here is a quick-start example using `BigGAN` with a pre-trained model.
-See the [doc section](#doc) below for all the details on these classes.
+
+See the [doc section](#doc) below for details on these classes and methods.
 
 ```python
 import torch
-from pytorch_pretrained_biggan import BigGAN, one_hot_from_name, truncated_noise_sample, save_as_images, display_in_terminal
+from pytorch_pretrained_biggan import (BigGAN, one_hot_from_name, truncated_noise_sample,
+                                       save_as_images, display_in_terminal)
 
 # OPTIONAL: if you want to have more information on what's happening, activate the logger as follows
 import logging
@@ -71,15 +73,16 @@ dogball = model(noise_vector, class_vector, truncation)
 # Save results as png images
 save_as_images(dogball)
 
-# If you have a sixtel compatible terminal you can display the images in the terminal (see https://github.com/saitoha/libsixel)
+# If you have a sixtel compatible terminal you can display the images in the terminal
+# (see https://github.com/saitoha/libsixel for details)
 display_in_terminal(dogball)
 ```
 
 ## Doc
 
-### Loading DeepMind's pre-trained weigths
+### Loading DeepMind's pre-trained weights
 
-To load one of DeepMind's pre-trained models, instantiate an instance of `BigGAN` as
+To load one of DeepMind's pre-trained models, instantiate a `BigGAN` model with `from_pretrained()` as:
 
 ```python
 model = BigGAN.from_pretrained(PRE_TRAINED_MODEL_NAME_OR_PATH, cache_dir=None)
@@ -105,9 +108,9 @@ where
 
 ### Configuration
 
-`BigGANConfig` is the BigGAN configuration class stored in [`config.py`](./pytorch_pretrained_biggan/config.py).
+`BigGANConfig` is a class to store and load BigGAN configurations. It's defined in [`config.py`](./pytorch_pretrained_biggan/config.py).
 
-Here are the details of the attributes:
+Here are some details on the attributes:
 
 - `output_dim`: output resolution of the GAN (128, 256 or 512) for the pre-trained models,
 - `z_dim`: size of the noise vector (128 for the pre-trained models).
@@ -121,25 +124,29 @@ Here are the details of the attributes:
 
 ### Model
 
-`BigGAN` is the BigGAN model. It comprises the class embeddings linear layer and the generator. The discrimiantor is currently not provided since pre-trained weights have not been released.
+`BigGAN` is a PyTorch model (`torch.nn.Module`) of BigGAN defined in [`model.py`](./pytorch_pretrained_biggan/model.py). This model comprises the class embeddings (a linear layer) and the generator with a series of convolutions and conditional batch norms. The discriminator is currently not implemented since pre-trained weights have not been released for it.
 
 The inputs and output are **identical to the TensorFlow model inputs and outputs**.
 
-We detail them here. This model takes as *inputs*:
-[`model.py`](./pytorch_pretrained_biggan/model.py)
+We detail them here.
+
+`BigGAN` takes as *inputs*:
+
 - `z`: a torch.FloatTensor of shape [batch_size, config.z_dim] with noise sampled from a truncated normal distribution, and
 - `class_label`: an optional torch.LongTensor of shape [batch_size, sequence_length] with the token types indices selected in [0, 1]. Type 0 corresponds to a `sentence A` and type 1 corresponds to a `sentence B` token (see BERT paper for more details).
 - `truncation`: a float between 0 (not comprised) and 1. The truncation of the truncated normal used for creating the noise vector. This truncation value is used to selecte between a set of pre-computed statistics (means and variances) for the batch norm layers.
 
-This model *outputs* an array of shape [batch_size, 3, resolution, resolution] where resolution is 128, 256 or 512 depending of the model:
+`BigGAN` *outputs* an array of shape [batch_size, 3, resolution, resolution] where resolution is 128, 256 or 512 depending of the model:
 
 ### Utilities: Images, Noise, Imagenet classes
 
-We provide a few utility method to use the model in [`utils.py`](./pytorch_pretrained_biggan/utils.py).
+We provide a few utility method to use the model. They are defined in [`utils.py`](./pytorch_pretrained_biggan/utils.py).
 
 Here are some details on these methods:
 
-- `truncated_noise_sample(batch_size=1, dim_z=128, truncation=1., seed=None)`: Create a truncated noise vector.
+- `truncated_noise_sample(batch_size=1, dim_z=128, truncation=1., seed=None)`:
+
+    Create a truncated noise vector.
     - Params:
         - batch_size: batch size.
         - dim_z: dimension of z
@@ -148,25 +155,33 @@ Here are some details on these methods:
     - Output:
         array of shape (batch_size, dim_z)
 
-- `convert_to_images(obj)`: Convert an output tensor from BigGAN in a list of images.
+- `convert_to_images(obj)`:
+
+    Convert an output tensor from BigGAN in a list of images.
     - Params:
         - obj: tensor or numpy array of shape (batch_size, channels, height, width)
     - Output:
         - list of Pillow Images of size (height, width)
 
-- `save_as_images(obj, file_name='output')`: Convert and save an output tensor from BigGAN in a list of saved images.
+- `save_as_images(obj, file_name='output')`:
+
+    Convert and save an output tensor from BigGAN in a list of saved images.
     - Params:
         - obj: tensor or numpy array of shape (batch_size, channels, height, width)
         - file_name: path and beggingin of filename to save.
             Images will be saved as `file_name_{image_number}.png`
 
-- `display_in_terminal(obj)`: Convert and display an output tensor from BigGAN in the terminal. This function use `libsixel` and will only work in a libsixel-compatible terminal. Please refer to https://github.com/saitoha/libsixel for more details.
+- `display_in_terminal(obj)`:
+
+    Convert and display an output tensor from BigGAN in the terminal. This function use `libsixel` and will only work in a libsixel-compatible terminal. Please refer to https://github.com/saitoha/libsixel for more details.
     - Params:
         - obj: tensor or numpy array of shape (batch_size, channels, height, width)
         - file_name: path and beggingin of filename to save.
             Images will be saved as `file_name_{image_number}.png`
 
-- `one_hot_from_int(int_or_list, batch_size=1)`: Create a one-hot vector from a class index or a list of class indices.
+- `one_hot_from_int(int_or_list, batch_size=1)`:
+
+    Create a one-hot vector from a class index or a list of class indices.
     - Params:
         - int_or_list: int, or list of int, of the imagenet classes (between 0 and 999)
         - batch_size: batch size.
@@ -175,17 +190,20 @@ Here are some details on these methods:
     - Output:
         - array of shape (batch_size, 1000)
 
-- `one_hot_from_name(class_name, batch_size=1)`: Create a one-hot vector from the name of an imagenet class ('tennis ball', 'daisy', ...). We use NLTK's wordnet search to try to find the relevant synset of ImageNet and take the first one. If we can't find it direcly, we look at the hyponyms and hypernyms of the class name.
+- `one_hot_from_name(class_name, batch_size=1)`:
+
+    Create a one-hot vector from the name of an imagenet class ('tennis ball', 'daisy', ...). We use NLTK's wordnet search to try to find the relevant synset of ImageNet and take the first one. If we can't find it direcly, we look at the hyponyms and hypernyms of the class name.
     - Params:
         - class_name: string containing the name of an imagenet object.
     - Output:
         - array of shape (batch_size, 1000)
 
-## Conversion script
+## Download and conversion scripts
 
-A script that can be used to convert models from TensorFlow Hub is provided in [./scripts/convert_tf_hub_models.sh](./scripts/convert_tf_hub_models.sh).
+Scripts to download and convert the TensorFlow models from TensorFlow Hub are provided in [./scripts](./scripts/).
 
-The script can be used directly as:
+The scripts can be used directly as:
 ```bash
+./scripts/download_tf_hub_models.sh
 ./scripts/convert_tf_hub_models.sh
 ```
