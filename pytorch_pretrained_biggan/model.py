@@ -1,8 +1,14 @@
 # coding: utf-8
 """ BigGAN PyTorch model.
-    Implemented from the computational graph of the TF Hub module for BigGAN.
+    From "Large Scale GAN Training for High Fidelity Natural Image Synthesis"
+    By Andrew Brocky, Jeff Donahuey and Karen Simonyan.
+    https://openreview.net/forum?id=B1xsqj09Fm
+
+    PyTorch version implemented from the computational graph of the TF Hub module for BigGAN.
     Some part of the code are adapted from https://github.com/brain-research/self-attention-gan
-    Only comprises the Generator since Discriminator's weights are not released
+
+    This version only comprises the generator (since the discriminator's weights are not released).
+    This version only comprises the "deep" version of BigGAN (see publication).
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -88,11 +94,12 @@ class SelfAttn(nn.Module):
 
 
 class BigGANBatchNorm(nn.Module):
-    """ This is a batch norm module that can handle conditional input and can be provide with pre-computed
-        activation mean and variance for various truncation parameters.
+    """ This is a batch norm module that can handle conditional input and can be provided with pre-computed
+        activation means and variances for various truncation parameters.
 
-        Unfortunately we cannot just rely on torch.batch_norm currently (pytorch 1.0.1) since it cannot handle
-        batched weights so we have to do the computation our-self.
+        We cannot just rely on torch.batch_norm since it cannot handle
+        batched weights (pytorch 1.0.1). We computate batch_norm our-self without updating running means and variances.
+        If you want to train this model you should add running means and variance computation logic.
     """
     def __init__(self, num_features, condition_vector_dim=None, n_stats=51, eps=1e-4, conditional=True):
         super(BigGANBatchNorm, self).__init__()
@@ -149,12 +156,16 @@ class GenBlock(nn.Module):
 
         self.bn_0 = BigGANBatchNorm(in_size, condition_vector_dim, n_stats=n_stats, eps=eps, conditional=True)
         self.conv_0 = snconv2d(in_channels=in_size, out_channels=middle_size, kernel_size=1, eps=eps)
+
         self.bn_1 = BigGANBatchNorm(middle_size, condition_vector_dim, n_stats=n_stats, eps=eps, conditional=True)
         self.conv_1 = snconv2d(in_channels=middle_size, out_channels=middle_size, kernel_size=3, padding=1, eps=eps)
+
         self.bn_2 = BigGANBatchNorm(middle_size, condition_vector_dim, n_stats=n_stats, eps=eps, conditional=True)
         self.conv_2 = snconv2d(in_channels=middle_size, out_channels=middle_size, kernel_size=3, padding=1, eps=eps)
+
         self.bn_3 = BigGANBatchNorm(middle_size, condition_vector_dim, n_stats=n_stats, eps=eps, conditional=True)
         self.conv_3 = snconv2d(in_channels=middle_size, out_channels=out_size, kernel_size=1, eps=eps)
+
         self.relu = nn.ReLU()
 
     def forward(self, x, cond_vector, truncation):

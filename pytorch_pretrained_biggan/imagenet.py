@@ -1,10 +1,23 @@
 #coding: utf-8
+""" BigGAN ImageNet utilities to prepare one hot input vectors for ImageNet classes.
+    We use Wordnet so you can just input a name in a string and automatically get a corresponding
+    imagenet class if it exists (or a hypo/hypernym exists in imagenet).
+"""
 import json
 import numpy as np
 
 NUM_CLASSES = 1000
 
 def one_hot_from_int(int_or_list, batch_size=1):
+    """ Create a one-hot vector from a class index or a list of class indices.
+        Params:
+            int_or_list: int, or list of int, of the imagenet classes (between 0 and 999)
+            batch_size: batch size.
+                If int_or_list is an int create a batch of identical classes.
+                If int_or_list is a list, we should have `len(int_or_list) == batch_size`
+        Output:
+            array of shape (batch_size, 1000)
+    """
     if isinstance(int_or_list, int):
         int_or_list = [int_or_list]
 
@@ -19,6 +32,15 @@ def one_hot_from_int(int_or_list, batch_size=1):
     return array
 
 def one_hot_from_name(class_name, batch_size=1):
+    """ Create a one-hot vector from the name of an imagenet class ('tennis ball', 'daisy', ...).
+        We use NLTK's wordnet search to try to find the relevant synset of ImageNet and take the first one.
+        If we can't find it direcly, we look at the hyponyms and hypernyms of the class name.
+
+        Params:
+            class_name: string containing the name of an imagenet object.
+        Output:
+            array of shape (batch_size, 1000)
+    """
     try:
         from nltk.corpus import wordnet as wn
     except ImportError:

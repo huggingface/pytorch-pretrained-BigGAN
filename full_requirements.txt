@@ -2,3 +2,4 @@ tensorflow
 tensorflow-hub
 Pillow
 NLTK
+python-libsixel

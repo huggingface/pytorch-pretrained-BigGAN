@@ -8,7 +8,10 @@ import copy
 import json
 
 class BigGANConfig(object):
-    """Configuration class to store the configuration of a `BigGAN`. """
+    """ Configuration class to store the configuration of a `BigGAN`. 
+        Defaults are for the 128x128 model.
+        layers tuple are (up-sample in the layer ?, input channels, output channels)
+    """
     def __init__(self,
                  output_dim=128,
                  z_dim=128,

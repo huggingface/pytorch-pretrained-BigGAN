@@ -27,9 +27,9 @@ def extract_batch_norm_stats(tf_model_path, batch_norm_stats_path=None):
         import tensorflow as tf
         import tensorflow_hub as hub
     except ImportError:
-        raise ImportError("Loading a TensorFlow models in PyTorch, requires TensorFlow and TF Hub to be installed."
-                          "Please see https://www.tensorflow.org/install/ for installation instructions for TensorFlow."
-                          "And see https://github.com/tensorflow/hub for installing Hub."
+        raise ImportError("Loading a TensorFlow models in PyTorch, requires TensorFlow and TF Hub to be installed. "
+                          "Please see https://www.tensorflow.org/install/ for installation instructions for TensorFlow. "
+                          "And see https://github.com/tensorflow/hub for installing Hub. "
                           "Probably pip install tensorflow tensorflow-hub")
     tf.reset_default_graph()
     logger.info('Loading BigGAN module from: {}'.format(tf_model_path))
