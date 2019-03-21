@@ -15,7 +15,7 @@ This implementation currently only contains the generator as the weights of the 
 
 This repo was tested on Python 3.6 and PyTorch 1.0.1
 
-PyTorch pretrained BigGAN can be installed by pip as follows:
+PyTorch pretrained BigGAN can be installed from pip as follows:
 ```bash
 pip install pytorch-pretrained-biggan
 ```
