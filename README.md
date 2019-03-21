@@ -9,7 +9,7 @@ This PyTorch implementation of BigGAN is provided with the [pretrained 128x128, 
 
 This reimplementation was done from the raw computation graph of the Tensorflow version and behave similarly to the TensorFlow version (variance of the output difference of the order of 1e-5).
 
-This implementation currently only contains the generator as the weights of the discriminator were not release (although the structure of the discriminator is very similar to the generator so it could be added pretty easily. Tell me if you want to do a PR on that, I would be happy to help.)
+This implementation currently only contains the generator as the weights of the discriminator were not released (although the structure of the discriminator is very similar to the generator so it could be added pretty easily. Tell me if you want to do a PR on that, I would be happy to help.)
 
 ## Installation
 
