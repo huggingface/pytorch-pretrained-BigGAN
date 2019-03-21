@@ -67,8 +67,17 @@ noise_vector = truncated_noise_sample(truncation=truncation, batch_size=3)
 noise_vector = torch.from_numpy(noise_vector)
 class_vector = torch.from_numpy(class_vector)
 
+# If you have a GPU, put everything on cuda
+noise_vector = noise_vector.to('cuda')
+class_vector = class_vector.to('cuda')
+model.to('cuda')
+
 # Generate an image
-output = model(noise_vector, class_vector, truncation)
+with torch.no_grad():
+    output = model(noise_vector, class_vector, truncation)
+
+# If you have a GPU put back on CPU
+output = output.to('cpu')
 
 # If you have a sixtel compatible terminal you can display the images in the terminal
 # (see https://github.com/saitoha/libsixel for details)
