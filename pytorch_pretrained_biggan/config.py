@@ -7,6 +7,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import copy
 import json
 
+PRETRAINED_CONFIG_ARCHIVE_MAP = {
+    'biggan-deep-128': "https://s3.amazonaws.com/models.huggingface.co/biggan/biggan-deep-128-config.json",
+    'biggan-deep-256': "https://s3.amazonaws.com/models.huggingface.co/biggan/biggan-deep-256-config.json",
+    'biggan-deep-512': "https://s3.amazonaws.com/models.huggingface.co/biggan/biggan-deep-512-config.json",
+}
+
+CONFIG_NAME = 'config.json'
+
 class BigGANConfig(object):
     """ Configuration class to store the configuration of a `BigGAN`. 
         Defaults are for the 128x128 model.
@@ -41,6 +49,28 @@ class BigGANConfig(object):
         self.attention_layer_position = attention_layer_position
         self.eps = eps
         self.n_stats = n_stats
+
+    def from_pretrained(cls, pretrained_model_name_or_path, cache_dir=None, *inputs, **kwargs):
+        if pretrained_model_name_or_path in PRETRAINED_CONFIG_ARCHIVE_MAP:
+            config_file = PRETRAINED_CONFIG_ARCHIVE_MAP[pretrained_model_name_or_path]
+        else:
+            config_file = os.path.join(pretrained_model_name_or_path, CONFIG_NAME)
+
+        try:
+            resolved_config_file = cached_path(config_file, cache_dir=cache_dir)
+        except EnvironmentError:
+            logger.error("Wrong config name, should be a valid path to a folder containing "
+                         "a {} file or a config name in {}".format(
+                         CONFIG_NAME, PRETRAINED_CONFIG_ARCHIVE_MAP.keys()))
+            raise
+
+        logger.info("loading config {} from cache at {}".format(pretrained_model_name_or_path, resolved_config_file))
+
+        # Load config
+        config = BigGANConfig.from_json_file(resolved_config_file)
+        logger.info("Model config {}".format(config))
+
+        return config
 
     @classmethod
     def from_dict(cls, json_object):
